@@ -58,7 +58,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       // and devices which only support WebVR.
       import WebXRPolyfill from './js/third-party/webxr-polyfill/build/webxr-polyfill.module.js';
       if (QueryArgs.getBool('usePolyfill', true)) {
+        console.log('kenLog: ', 'usePolyfill');
         let polyfill = new WebXRPolyfill();
+      } else {
+        console.log('kenLog: ', 'usePolyfill');
       }
 
       // XR globals.
@@ -71,6 +74,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       let scene = new Scene();
       scene.addNode(new Gltf2Node({url: 'media/gltf/space/space.gltf'}));
       scene.addNode(new SkyboxNode({url: 'media/textures/milky-way-4k.png'}));
+
+      let myTestLayer = null;
 
       // Checks to see if WebXR is available and, if so, queries a list of
       // XRDevices that are connected to the system.
@@ -126,7 +131,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         // Use the new WebGL context to create a XRWebGLLayer and set it as the
         // sessions baseLayer. This allows any content rendered to the layer to
         // be displayed on the XRDevice.
-        session.updateRenderState({ baseLayer: new XRWebGLLayer(session, gl) });
+        myTestLayer = new XRWebGLLayer(session, gl)
+        session.updateRenderState({ baseLayer:  myTestLayer});
 
         // Get a frame of reference, which is required for querying poses. In
         // this case an 'local' frame of reference means that all poses will
@@ -159,6 +165,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
       // Called every time the XRSession requests that a new frame be drawn.
       function onXRFrame(t, frame) {
+        console.log('kenLog: ', 'onXRFrame begin');
         let session = frame.session;
 
         // Per-frame scene setup. Nothing WebXR specific here.
@@ -189,8 +196,24 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
           // Loop through each of the views reported by the frame and draw them
           // into the corresponding viewport.
-          for (let view of pose.views) {
-            let viewport = glLayer.getViewport(view);
+          // for (let view of pose.views) {
+          //   let viewport = glLayer.getViewport(view);
+          //   gl.viewport(viewport.x, viewport.y,
+          //               viewport.width, viewport.height);
+
+          //   // Draw this view of the scene. What happens in this function really
+          //   // isn't all that important. What is important is that it renders
+          //   // into the XRWebGLLayer's framebuffer, using the viewport into that
+          //   // framebuffer reported by the current view, and using the
+          //   // projection matrix and view transform from the current view.
+          //   // We bound the framebuffer and viewport up above, and are passing
+          //   // in the appropriate matrices here to be used when rendering.
+          //   scene.draw(view.projectionMatrix, view.transform);
+          // }
+
+          //test code
+          let view = pose.views[0]
+          let viewport = glLayer.getViewport(view);
             gl.viewport(viewport.x, viewport.y,
                         viewport.width, viewport.height);
 
@@ -202,7 +225,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             // We bound the framebuffer and viewport up above, and are passing
             // in the appropriate matrices here to be used when rendering.
             scene.draw(view.projectionMatrix, view.transform);
-          }
+
         } else {
           // There's several options for handling cases where no pose is given.
           // The simplest, which these samples opt for, is to simply not draw
@@ -219,6 +242,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         // Per-frame scene teardown. Nothing WebXR specific here.
         scene.endFrame();
+        console.log('kenLog: ', 'onXRFrame end');
       }
 
       // Start the XR application.
