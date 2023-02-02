@@ -75,7 +75,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       scene.addNode(new Gltf2Node({url: 'media/gltf/space/space.gltf'}));
       scene.addNode(new SkyboxNode({url: 'media/textures/milky-way-4k.png'}));
 
-      let myTestLayer = null;
+      let xr_webgl_layer = null;
+      let xr_projection_layer_self = null;
 
       // Checks to see if WebXR is available and, if so, queries a list of
       // XRDevices that are connected to the system.
@@ -131,8 +132,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         // Use the new WebGL context to create a XRWebGLLayer and set it as the
         // sessions baseLayer. This allows any content rendered to the layer to
         // be displayed on the XRDevice.
-        myTestLayer = new XRWebGLLayer(session, gl)
-        session.updateRenderState({ baseLayer:  myTestLayer});
+
+        //myTestLayer = new XRWebGLLayer(session, gl)
+        //session.updateRenderState({ baseLayer:  myTestLayer});
+
+        xr_projection_layer_self = new XRProjectionLayerProto(session, gl)
+        session.updateRenderState({ layers: [xr_projection_layer_self] });
 
         // Get a frame of reference, which is required for querying poses. In
         // this case an 'local' frame of reference means that all poses will
@@ -184,7 +189,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         // framebuffer cleared, so tracking loss means the scene will simply
         // disappear.
         if (pose) {
-          let glLayer = session.renderState.baseLayer;
+          // let glLayer = session.renderState.baseLayer;
+          let glLayer = session.renderState.layers[0];
 
           // If we do have a valid pose, bind the WebGL layer's framebuffer,
           // which is where any content to be displayed on the XRDevice must be
