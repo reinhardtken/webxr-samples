@@ -76,7 +76,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       scene.addNode(new SkyboxNode({url: 'media/textures/milky-way-4k.png'}));
 
       let xr_webgl_layer = null;
-      let xr_projection_layer_self = null;
+      let xr_projection_layer_proto = null;
+      let xrFramebuffer = null;
 
       // Checks to see if WebXR is available and, if so, queries a list of
       // XRDevices that are connected to the system.
@@ -136,8 +137,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         //myTestLayer = new XRWebGLLayer(session, gl)
         //session.updateRenderState({ baseLayer:  myTestLayer});
 
-        xr_projection_layer_self = new XRProjectionLayerProto(session, gl)
-        session.updateRenderState({ layers: [xr_projection_layer_self] });
+        xrFramebuffer = gl.createFramebuffer();
+
+        xr_projection_layer_proto = new XRProjectionLayerProto(session, gl)
+        session.updateRenderState({ layers: [xr_projection_layer_proto] });
+
+        xr_projection_layer_proto.framebuffer = xrFramebuffer
 
         // Get a frame of reference, which is required for querying poses. In
         // this case an 'local' frame of reference means that all poses will
