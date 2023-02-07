@@ -140,6 +140,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         xrFramebuffer = gl.createFramebuffer();
 
         xr_projection_layer_proto = new XRProjectionLayerProto(session, gl)
+        xr_projection_layer_proto.cppFramebufferTexture2D(true);
         session.updateRenderState({ layers: [xr_projection_layer_proto] });
 
         xr_projection_layer_proto.framebuffer = xrFramebuffer
@@ -196,7 +197,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (pose) {
           // let glLayer = session.renderState.baseLayer;
           let glLayer = session.renderState.layers[0];
-
           // If we do have a valid pose, bind the WebGL layer's framebuffer,
           // which is where any content to be displayed on the XRDevice must be
           // rendered.
@@ -206,6 +206,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           console.log('kenLog: framebufferTexture2D begin');
           // gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, glLayer.colorTexture, 0);
           // gl.framebufferTexture2DMultisampleEXT
+          // xr_projection_layer_proto.doFramebufferTexture2D();
           console.log('kenLog: framebufferTexture2D end');
 
           // Clear the framebuffer
