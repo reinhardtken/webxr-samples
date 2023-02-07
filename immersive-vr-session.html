@@ -202,29 +202,23 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           // rendered.
           gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
 
+          
+          console.log('kenLog: framebufferTexture2D begin');
+          // gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, glLayer.colorTexture, 0);
+          // gl.framebufferTexture2DMultisampleEXT
+          console.log('kenLog: framebufferTexture2D end');
+
           // Clear the framebuffer
           gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+          var e = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+          if (gl.FRAMEBUFFER_COMPLETE !== e) {
+            console.log('Frame buffer object is incomplete: ' + e.toString());
+          }
           // Loop through each of the views reported by the frame and draw them
           // into the corresponding viewport.
-          // for (let view of pose.views) {
-          //   let viewport = glLayer.getViewport(view);
-          //   gl.viewport(viewport.x, viewport.y,
-          //               viewport.width, viewport.height);
-
-          //   // Draw this view of the scene. What happens in this function really
-          //   // isn't all that important. What is important is that it renders
-          //   // into the XRWebGLLayer's framebuffer, using the viewport into that
-          //   // framebuffer reported by the current view, and using the
-          //   // projection matrix and view transform from the current view.
-          //   // We bound the framebuffer and viewport up above, and are passing
-          //   // in the appropriate matrices here to be used when rendering.
-          //   scene.draw(view.projectionMatrix, view.transform);
-          // }
-
-          //test code
-          let view = pose.views[0]
-          let viewport = glLayer.getViewport(view);
+          for (let view of pose.views) {
+            let viewport = glLayer.getViewport(view);
             gl.viewport(viewport.x, viewport.y,
                         viewport.width, viewport.height);
 
@@ -236,6 +230,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             // We bound the framebuffer and viewport up above, and are passing
             // in the appropriate matrices here to be used when rendering.
             scene.draw(view.projectionMatrix, view.transform);
+          }
+
+          //test code
+          // let view = pose.views[0]
+          // let viewport = glLayer.getViewport(view);
+          //   gl.viewport(viewport.x, viewport.y,
+          //               viewport.width, viewport.height);
+
+          //   // Draw this view of the scene. What happens in this function really
+          //   // isn't all that important. What is important is that it renders
+          //   // into the XRWebGLLayer's framebuffer, using the viewport into that
+          //   // framebuffer reported by the current view, and using the
+          //   // projection matrix and view transform from the current view.
+          //   // We bound the framebuffer and viewport up above, and are passing
+          //   // in the appropriate matrices here to be used when rendering.
+          //   scene.draw(view.projectionMatrix, view.transform);
 
         } else {
           // There's several options for handling cases where no pose is given.
