@@ -78,6 +78,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       let xr_webgl_layer = null;
       let xr_projection_layer_proto = null;
       let xrFramebuffer = null;
+      let counter = 0;
+      let js_init_flag = true;
+      let js_loop_flag = true;
 
       // Checks to see if WebXR is available and, if so, queries a list of
       // XRDevices that are connected to the system.
@@ -140,10 +143,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         xrFramebuffer = gl.createFramebuffer();
 
         xr_projection_layer_proto = new XRProjectionLayerProto(session, gl)
-        xr_projection_layer_proto.cppFramebufferTexture2D(true);
+        if (js_init_flag) {
+          xr_projection_layer_proto.cppFramebufferTexture2D(false);
+        } else {
+          xr_projection_layer_proto.cppFramebufferTexture2D(true);
+        }
         session.updateRenderState({ layers: [xr_projection_layer_proto] });
 
         xr_projection_layer_proto.framebuffer = xrFramebuffer
+        // xr_projection_layer_proto.cppFramebufferTexture2D(false);
 
         // Get a frame of reference, which is required for querying poses. In
         // this case an 'local' frame of reference means that all poses will
@@ -194,6 +202,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         // to render with it. If not in this case we'll just leave the
         // framebuffer cleared, so tracking loss means the scene will simply
         // disappear.
+        counter += 1;
         if (pose) {
           // let glLayer = session.renderState.baseLayer;
           let glLayer = session.renderState.layers[0];
@@ -207,21 +216,38 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           // gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, glLayer.colorTexture, 0);
           // gl.framebufferTexture2DMultisampleEXT
           // xr_projection_layer_proto.doFramebufferTexture2D();
+
+          if (js_loop_flag) {
+            xr_projection_layer_proto.doFramebufferTexture2D();
+          }
           console.log('kenLog: framebufferTexture2D end');
 
           // Clear the framebuffer
           gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+          
 
           var e = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
           if (gl.FRAMEBUFFER_COMPLETE !== e) {
             console.log('Frame buffer object is incomplete: ' + e.toString());
           }
+
           // Loop through each of the views reported by the frame and draw them
           // into the corresponding viewport.
           for (let view of pose.views) {
             let viewport = glLayer.getViewport(view);
+
+
+            // if (jsFlag) {
+            //   gl.enable(gl.SCISSOR_TEST);
+            //   gl.scissor(viewport.x, viewport.y, viewport.width, viewport.height);
+            //   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            //   gl.disable(gl.SCISSOR_TEST);
+            // }
+
             gl.viewport(viewport.x, viewport.y,
                         viewport.width, viewport.height);
+
+            
 
             // Draw this view of the scene. What happens in this function really
             // isn't all that important. What is important is that it renders
@@ -232,6 +258,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             // in the appropriate matrices here to be used when rendering.
             scene.draw(view.projectionMatrix, view.transform);
           }
+
+          // if (counter > 100) {
+          //   js_loop_flag = true;
+          //   xr_projection_layer_proto.cppFramebufferTexture2D(false);
+          // }
 
           //test code
           // let view = pose.views[0]
