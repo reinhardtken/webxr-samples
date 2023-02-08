@@ -84,6 +84,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       // let js_init_flag = false;
       // let js_loop_flag = false;
 
+      let xrGLFactory = null;
+
       // Checks to see if WebXR is available and, if so, queries a list of
       // XRDevices that are connected to the system.
       function initXR() {
@@ -143,16 +145,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         //session.updateRenderState({ baseLayer:  myTestLayer});
 
         xrFramebuffer = gl.createFramebuffer();
-
-        xr_projection_layer_proto = new XRProjectionLayerProto(session, gl)
-        if (js_init_flag) {
-          xr_projection_layer_proto.cppFramebufferTexture2D(false);
-        } else {
-          xr_projection_layer_proto.cppFramebufferTexture2D(true);
-        }
-        session.updateRenderState({ layers: [xr_projection_layer_proto] });
-
-        xr_projection_layer_proto.framebuffer = xrFramebuffer
+        xrGLFactory = new XRWebGLBinding(session, gl);
+        // xr_projection_layer_proto = new XRProjectionLayerProto(session, gl)
+        // if (js_init_flag) {
+        //   xr_projection_layer_proto.cppFramebufferTexture2D(false);
+        // } else {
+        //   xr_projection_layer_proto.cppFramebufferTexture2D(true);
+        // }
+    
         // xr_projection_layer_proto.cppFramebufferTexture2D(false);
 
         // Get a frame of reference, which is required for querying poses. In
@@ -160,6 +160,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         // be relative to the location where the XRDevice was first detected.
         session.requestReferenceSpace('local').then((refSpace) => {
           xrRefSpace = refSpace;
+          xr_projection_layer_proto = xrGLFactory.createProjectionLayer({ space: refSpace, stencil: false });
+          if (js_init_flag) {
+            xr_projection_layer_proto.cppFramebufferTexture2D(false);
+          } else {
+            xr_projection_layer_proto.cppFramebufferTexture2D(true);
+          }
+
+          session.updateRenderState({ layers: [xr_projection_layer_proto] });
+
+          xr_projection_layer_proto.framebuffer = xrFramebuffer
+
 
           // Inform the session that we're ready to begin drawing.
           session.requestAnimationFrame(onXRFrame);
@@ -220,8 +231,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           // xr_projection_layer_proto.doFramebufferTexture2D();
 
           if (js_loop_flag) {
-            xr_projection_layer_proto.doFramebufferTexture2D();
-            // xr_projection_layer_proto.doClear();
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, glLayer.colorTexture, 0);
+            // xr_projection_layer_proto.doFramebufferTexture2D();
+            xr_projection_layer_proto.doClear();
           }
           console.log('kenLog: framebufferTexture2D end');
 
