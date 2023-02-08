@@ -257,6 +257,7 @@ export class Scene extends Node {
     }
 
     if (this.clear) {
+      console.log('kenLog: clear');
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     }
 

@@ -81,6 +81,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       let counter = 0;
       let js_init_flag = true;
       let js_loop_flag = true;
+      // let js_init_flag = false;
+      // let js_loop_flag = false;
 
       // Checks to see if WebXR is available and, if so, queries a list of
       // XRDevices that are connected to the system.
@@ -219,11 +221,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
           if (js_loop_flag) {
             xr_projection_layer_proto.doFramebufferTexture2D();
+            // xr_projection_layer_proto.doClear();
           }
           console.log('kenLog: framebufferTexture2D end');
 
           // Clear the framebuffer
-          gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+          // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
           
 
           var e = gl.checkFramebufferStatus(gl.FRAMEBUFFER);

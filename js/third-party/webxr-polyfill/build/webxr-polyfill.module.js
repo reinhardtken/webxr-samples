@@ -2480,6 +2480,7 @@ CardboardDistorter.prototype.onResize = function () {
     self.realColorMask.call(gl, true, true, true, true);
     self.realViewport.call(gl, 0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     self.realClearColor.call(gl, 0, 0, 0, 1);
+    console.log('kenLog: clear');
     gl.clear(gl.COLOR_BUFFER_BIT);
     self.realBindFramebuffer.call(gl, gl.FRAMEBUFFER, self.framebuffer);
     gl.bindTexture(gl.TEXTURE_2D, self.renderTarget);
@@ -2693,6 +2694,7 @@ CardboardDistorter.prototype.submitFrame = function () {
     self.realViewport.call(gl, 0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     if (self.ctxAttribs.alpha || isIOS()) {
       self.realClearColor.call(gl, 0, 0, 0, 1);
+      console.log('kenLog: clear');
       gl.clear(gl.COLOR_BUFFER_BIT);
     }
     gl.useProgram(self.program);
@@ -2713,6 +2715,7 @@ CardboardDistorter.prototype.submitFrame = function () {
     self.realBindFramebuffer.call(self.gl, gl.FRAMEBUFFER, self.framebuffer);
     if (!self.ctxAttribs.preserveDrawingBuffer) {
       self.realClearColor.call(gl, 0, 0, 0, 0);
+      console.log('kenLog: clear');
       gl.clear(gl.COLOR_BUFFER_BIT);
     }
     if (!self.dirtySubmitFrameBindings) {
