@@ -75,8 +75,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     let depth_render_buffer = null;
 
     let config = {
-      "use_js_depth": true,
-      "use_render_buffer": true,
+      "jsUseDepth": false,
+      "jsUseRenderBuffer": false,
     };
 
     // WebGL scene globals.
@@ -107,6 +107,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       if (!xrSession) {
         navigator.xr.requestSession('immersive-vr', {
           requiredFeatures: ['layers'],
+          sessionInitConfig: config,
         }).then(onSessionStarted);
       } else {
         onEndSession();
@@ -203,8 +204,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       xrFramebuffer = gl.createFramebuffer();
       xrGLFactory = new XRWebGLBinding(session, gl);
 
-      if (config["use_js_depth"]) {
-        if (config["use_render_buffer"]) {
+      if (config["jsUseDepth"]) {
+        if (config["jsUseRenderBuffer"]) {
           depth_render_buffer = createDepthRenderBuffer(gl);
         } else {
           depth_texture = createDepthTexture(gl);
@@ -254,8 +255,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
           viewport = glLayer.viewport;
 
-          if (config["use_js_depth"]) {
-            if (config["use_render_buffer"]) {
+          if (config["jsUseDepth"]) {
+            if (config["jsUseRenderBuffer"]) {
             } else {
               clearDepthTexture(xrFramebuffer2, depth_texture);
             }
@@ -264,8 +265,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           gl.bindFramebuffer(gl.FRAMEBUFFER, xrFramebuffer);
           gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, glLayer.colorTexture, 0);
 
-          if (config["use_js_depth"]) {
-            if (config["use_render_buffer"]) {
+          if (config["jsUseDepth"]) {
+            if (config["jsUseRenderBuffer"]) {
               console.log("use_js_depth_render_buffer");
               gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depth_render_buffer);
               gl.clear(gl.DEPTH_BUFFER_BIT);
@@ -274,7 +275,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
               gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depth_texture, 0);
             }
           } else {
-            console.log("not use_js_depth");
+            console.log("not jsUseDepth");
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, glLayer.depthStencilTexture, 0);
           }
 
