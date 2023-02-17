@@ -72,9 +72,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     let xrFramebuffer = null;
     let xrFramebuffer2 = null;
     let depth_texture = null;
+    let depth_render_buffer = null;
 
     let config = {
-      "use_js_depth_texture": true,
+      "use_js_depth": true,
+      "use_render_buffer": true,
     };
 
     // WebGL scene globals.
@@ -118,16 +120,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       }
     }
 
-    // function initDepth(gl) {
-    //   let depthBuffer = gl.createRenderbuffer(); // Create a renderbuffer object
-    //   if (!depthBuffer) {
-    //     console.log('Failed to create renderbuffer object');
-    //     return error();
-    //   }
-    //   gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
-    //   gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 2880, 1584);
-    //   return depthBuffer
-    // }
+    function createDepthRenderBuffer(gl) {
+      let depthBuffer = gl.createRenderbuffer(); // Create a renderbuffer object
+      if (!depthBuffer) {
+        console.log('Failed to create renderbuffer object');
+        return error();
+      }
+      gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 2880, 1584);
+      return depthBuffer
+    }
+
 
     function initGL() {
       if (gl) { return; }
@@ -195,13 +198,19 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       session.addEventListener('end', onSessionEnded);
 
       initGL();
-      if (config["use_js_depth_texture"]) {
-        depth_texture = createDepthTexture(gl);
-        xrFramebuffer2 = gl.createFramebuffer();
-      }
+      
       
       xrFramebuffer = gl.createFramebuffer();
       xrGLFactory = new XRWebGLBinding(session, gl);
+
+      if (config["use_js_depth"]) {
+        if (config["use_render_buffer"]) {
+          depth_render_buffer = createDepthRenderBuffer(gl);
+        } else {
+          depth_texture = createDepthTexture(gl);
+          xrFramebuffer2 = gl.createFramebuffer();
+        }
+      }
 
       session.requestReferenceSpace('local').then((refSpace) => {
         xrRefSpace = refSpace;
@@ -245,18 +254,27 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
           viewport = glLayer.viewport;
 
-          if (config["use_js_depth_texture"]) {
-            clearDepthTexture(xrFramebuffer2, depth_texture);
+          if (config["use_js_depth"]) {
+            if (config["use_render_buffer"]) {
+            } else {
+              clearDepthTexture(xrFramebuffer2, depth_texture);
+            }
           }
 
           gl.bindFramebuffer(gl.FRAMEBUFFER, xrFramebuffer);
           gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, glLayer.colorTexture, 0);
 
-          if (config["use_js_depth_texture"]) {
-            console.log("use_js_depth_texture");
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depth_texture, 0);
+          if (config["use_js_depth"]) {
+            if (config["use_render_buffer"]) {
+              console.log("use_js_depth_render_buffer");
+              gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depth_render_buffer);
+              gl.clear(gl.DEPTH_BUFFER_BIT);
+            } else {
+              console.log("use_js_depth_texture");
+              gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depth_texture, 0);
+            }
           } else {
-            console.log("not use_js_depth_texture");
+            console.log("not use_js_depth");
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, glLayer.depthStencilTexture, 0);
           }
 
