@@ -73,6 +73,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     let xrFramebuffer2 = null;
     let depth_texture = null;
 
+    let config = {
+      "use_js_depth_texture": true,
+    };
+
     // WebGL scene globals.
     let gl = null;
     let renderer = null;
@@ -191,16 +195,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       session.addEventListener('end', onSessionEnded);
 
       initGL();
-      depth_texture = createDepthTexture(gl);
-      xrFramebuffer2 = gl.createFramebuffer();
-
+      if (config["use_js_depth_texture"]) {
+        depth_texture = createDepthTexture(gl);
+        xrFramebuffer2 = gl.createFramebuffer();
+      }
+      
       xrFramebuffer = gl.createFramebuffer();
       xrGLFactory = new XRWebGLBinding(session, gl);
 
       session.requestReferenceSpace('local').then((refSpace) => {
         xrRefSpace = refSpace;
         proj_layer = xrGLFactory.createProjectionLayer({ space: refSpace, stencil: false });
-        // proj_layer.cppFramebufferTexture2D(true);
         session.updateRenderState({ layers: [proj_layer] });
 
         session.requestAnimationFrame(onXRFrame);
@@ -233,24 +238,27 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         scene.updateInputSources(frame, xrRefSpace);
 
         let views = [];
-        let i = 0;
         for (let view of pose.views) {
           let viewport = null;
           let glLayer = xrGLFactory.getViewSubImage(proj_layer, view);
-          // let glLayer = xrSession.renderState.layers[0];
           glLayer.framebuffer = xrFramebuffer;
 
           viewport = glLayer.viewport;
-          // viewport = glLayer.getViewport(view);
 
-          clearDepthTexture(xrFramebuffer2, depth_texture);
+          if (config["use_js_depth_texture"]) {
+            clearDepthTexture(xrFramebuffer2, depth_texture);
+          }
 
           gl.bindFramebuffer(gl.FRAMEBUFFER, xrFramebuffer);
           gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, glLayer.colorTexture, 0);
-          // gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, glLayer.depthStencilTexture, 0);
 
-          // bindDepthTexture(gl, depth_texture);
-          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depth_texture, 0);
+          if (config["use_js_depth_texture"]) {
+            console.log("use_js_depth_texture");
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depth_texture, 0);
+          } else {
+            console.log("not use_js_depth_texture");
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, glLayer.depthStencilTexture, 0);
+          }
 
           // checkError(gl);
 
@@ -263,20 +271,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           // gl.scissor(viewport.x, viewport.y, viewport.width, viewport.height);
           // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
           // gl.disable(gl.SCISSOR_TEST);
-
-          if (i == 0) {
-            //gl.enable(gl.SCISSOR_TEST);
-            //gl.scissor(viewport.x, viewport.y, viewport.width, viewport.height);
-            // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            //gl.clear(gl.DEPTH_BUFFER_BIT);
-            //gl.clear(gl.COLOR_BUFFER_BIT);
-            //gl.disable(gl.SCISSOR_TEST);
-          }
-          i += 1;
-
-          // glLayer.doClear();
-
-          // gl.clear(gl.DEPTH_BUFFER_BIT);
 
           // Gather all the values needed for one view and push it into the
           // array of views to be drawn. WebXRView is a utility class that
