@@ -76,7 +76,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     let config = {
       "jsUseDepth": false,
-      "jsUseRenderBuffer": false,
+      "jsUseRenderBuffer": true,
+      "doClearWork": false,
     };
 
     // WebGL scene globals.
@@ -262,6 +263,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             }
           }
 
+          if (!config["jsUseDepth"]) {
+            if (!config["doClearWork"]) {
+              console.log("doClearWork alone");
+              proj_layer.clearWork();
+            } 
+          }
+
           gl.bindFramebuffer(gl.FRAMEBUFFER, xrFramebuffer);
           gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, glLayer.colorTexture, 0);
 
@@ -277,6 +285,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           } else {
             console.log("not jsUseDepth");
             gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, glLayer.depthStencilTexture, 0);
+            //gl.clear(gl.DEPTH_BUFFER_BIT);
           }
 
           // checkError(gl);
